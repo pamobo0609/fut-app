@@ -40,3 +40,4 @@ out/
 .kotlin
 *.jar
 *.bat
+.DS_Store
