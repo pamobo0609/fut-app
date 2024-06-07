@@ -1,0 +1,67 @@
+# IDE & OS specific files
+.idea/
+.project
+.eclipse/
+.classpath
+.settings/
+target/
+local.properties
+
+# JVM related files
+*.log
+*.pid
+*.stacktrace
+
+# Test coverage reports
+**/coverage/*
+**/build/reports/*
+
+# Specific test output
+**/test-results/*
+
+# Temporary files from maven or gradle
+**/.gradle/
+**/.m2/repository/
+
+# Generated files for kapt
+**/build/generated/*
+
+# Database files (if applicable)
+*.sql
+**/flyway/sql/*
+
+# Secrets Management
+*.properties  # Change this if you use a different file extension for secrets
+
+# Spring Specific
+**/application.properties  # Change this if you use a different file extension for Spring configs (e.g., .yml)
+
+# Docker files and volumes (if applicable)
+Dockerfile
+docker-compose.yml
+**/docker-compose*  # Ignore all docker-compose variations (e.g., docker-compose.override.yml)
+**/.dockerignore
+
+# Dependency lock files (based on build system)
+**/gradle.lock
+**/package-lock.json  # For npm or yarn
+
+# IntelliJ IDEA specific settings
+*.iml
+
+# Editor temporary/backup files
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+
+# VSCode specific files
+.vscode/
+
+# Local configurations
+**/.env
+
+# Examples files (if applicable)
+**/src/main/resources/example*.properties
+**/src/main/resources/example*.yml
