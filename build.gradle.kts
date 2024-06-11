@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
@@ -27,8 +29,10 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.3.0")
     runtimeOnly("org.postgresql:postgresql")
 
+    implementation("io.rest-assured:rest-assured:5.4.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:1.13.11")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -38,6 +42,16 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+
+    testLogging {
+        events("PASSED", "SKIPPED", "FAILED")
+        exceptionFormat = TestExceptionFormat.FULL
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
+
+    systemProperty("projectRoot", rootDir)
 }

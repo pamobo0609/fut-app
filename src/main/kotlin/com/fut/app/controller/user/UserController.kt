@@ -7,7 +7,6 @@ import com.fut.app.common.api.APIResult.Success
 import com.fut.app.common.api.request.CreateUserRequest
 import com.fut.app.common.api.request.CreateUserResultStatus
 import com.fut.app.model.User
-import com.fut.app.service.user.GetAllUsersFailure.UsersNotFound
 import com.fut.app.service.user.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -15,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -38,19 +39,10 @@ class UserController(
             ApiResponse(
                 responseCode = "200",
                 content = [Content(schema = Schema(implementation = User::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                content = [Content(schema = Schema(implementation = APIDocument::class))]
-            ),
+            )
         ]
     )
-    fun getAllUsers(): ResponseEntity<APIDocument<List<User>>> = when (val result = userService.getAllUsers()) {
-        is Success -> result.value.toAPIDocument().toResponseEntity()
-        is Failure -> when (result.error) {
-            is UsersNotFound -> usersNotFound().toApiDocument<List<User>>().toResponseEntity(status = HttpStatus.NOT_FOUND)
-        }
-    }
+    fun getAllUsers(): ResponseEntity<APIDocument<List<User>>> = ResponseEntity(userService.getAllUsers().toAPIDocument(), HttpStatus.OK)
 
     @PostMapping(
         value = [CREATE_USER_MAPPING],
@@ -99,7 +91,7 @@ class UserController(
         ]
     )
     fun updateUser(
-        @PathVariable("id") id: Long,
+        @PathVariable(value = "id") @NotBlank @Min(value = ZERO.toLong(), message = "An id must be a positive number") id: Long,
         @Parameter(description = "JSON object defining the user to update", required = true) @Valid @RequestBody request: CreateUserRequest
     ) = when (val result = userService.updateUser(id, request)) {
         is Success -> {

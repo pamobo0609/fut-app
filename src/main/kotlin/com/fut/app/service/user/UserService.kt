@@ -12,7 +12,6 @@ import com.fut.app.entity.UserEntity
 import com.fut.app.entity.toUser
 import com.fut.app.model.User
 import com.fut.app.repository.UserRepository
-import com.fut.app.service.user.GetAllUsersFailure.UsersNotFound
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -25,16 +24,16 @@ class UserService(
     private val userRepository: UserRepository
 ) {
 
-    fun getAllUsers(): APIResult<List<User>, GetAllUsersFailure> {
+    fun getAllUsers(): List<User> {
         val users = userRepository.findAll().toList()
-        return if (users.isNotEmpty()) Success(users.map { it.toUser() }) else Failure(UsersNotFound)
+        return users.map { it.toUser() }
     }
 
     fun createUser(request: CreateUserRequest): APIResult<User, CreateUserResultStatus> = when {
         // Conflict avoidance
         userRepository.existsByEmail(request.email) -> Failure(CreateUserResultStatus.EMAIL_CONFLICT)
         // Format validation
-        isEmailValid(request.email) -> Failure(CreateUserResultStatus.INVALID_EMAIL)
+        !isEmailValid(request.email) -> Failure(CreateUserResultStatus.INVALID_EMAIL)
         // Otherwise, the user will be added
         else -> Success(saveUser(request.toEntity()).toUser())
     }
@@ -65,7 +64,7 @@ class UserService(
             // Conflict avoidance
             userRepository.existsByEmail(updateRequest.email) -> return Failure(CreateUserResultStatus.EMAIL_CONFLICT)
             // Format validation
-            isEmailValid(updateRequest.email) -> return Failure(CreateUserResultStatus.INVALID_EMAIL)
+            !isEmailValid(updateRequest.email) -> return Failure(CreateUserResultStatus.INVALID_EMAIL)
         }
 
         try {
@@ -84,8 +83,4 @@ class UserService(
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
     }
-}
-
-sealed class GetAllUsersFailure {
-    data object UsersNotFound : GetAllUsersFailure()
 }
