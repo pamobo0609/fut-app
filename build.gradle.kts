@@ -28,12 +28,17 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("javax.xml.bind:jaxb-api:2.3.0")
     runtimeOnly("org.postgresql:postgresql")
-
-    implementation("io.rest-assured:rest-assured:5.4.0")
+    // Region Test dependencies
+    testImplementation("com.h2database:h2:2.2.224")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.rest-assured:rest-assured:5.4.0")
     testImplementation("io.mockk:mockk:1.13.11")
+    testImplementation("org.mockito:mockito-junit-jupiter:2.23.4")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // endregion
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 kotlin {

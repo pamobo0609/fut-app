@@ -101,12 +101,6 @@ class UserController(
         is Failure -> handleUserCreationFailure(result.error)
     }
 
-    private fun usersNotFound() = APIError(
-        code = HttpStatus.NOT_FOUND.value(),
-        title = "No users found.",
-        detail = "No users at all in the database."
-    )
-
     private fun handleUserCreationFailure(status: CreateUserResultStatus) = when(status) {
         CreateUserResultStatus.INVALID_EMAIL -> ResponseEntity(
             APIDocument<User>(
@@ -130,7 +124,19 @@ class UserController(
                         detail = "Email address already in use."
                     )
                 )
-            ), HttpStatus.BAD_REQUEST
+            ), HttpStatus.CONFLICT
+        )
+        CreateUserResultStatus.NOT_FOUND -> ResponseEntity(
+            APIDocument<User>(
+                data = null,
+                errors = listOf(
+                    APIError(
+                        code = HttpStatus.NOT_FOUND.value(),
+                        title = "User not found.",
+                        detail = "User not found in the database."
+                    )
+                )
+            ), HttpStatus.NOT_FOUND
         )
         else -> ResponseEntity(
             APIDocument<User>(

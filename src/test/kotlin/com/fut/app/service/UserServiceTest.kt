@@ -1,4 +1,4 @@
-package com.fut.app.user
+package com.fut.app.service
 
 import com.fut.app.common.api.APIResult.Failure
 import com.fut.app.common.api.APIResult.Success
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
-import kotlin.math.exp
 
 class UserServiceTest {
 
