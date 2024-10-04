@@ -175,9 +175,4 @@ class UserControllerTest {
         val actual = userController.updateUser(stubbedUserId, stubbedCreateUserRequest)
         assertThat(actual).isEqualTo(expected)
     }
-
-    @Test
-    fun `WHEN updating a user with an invalid id THEN 400`() {
-
-    }
 }

@@ -50,7 +50,7 @@ class UserController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Operation(
-        summary = "Creates a new user",
+        summary = "Registers a new user",
         responses = [
             ApiResponse(
                 responseCode = "200",

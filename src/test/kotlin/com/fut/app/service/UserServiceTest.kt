@@ -3,11 +3,11 @@ package com.fut.app.service
 import com.fut.app.common.api.APIResult.Failure
 import com.fut.app.common.api.APIResult.Success
 import com.fut.app.common.api.request.CreateUserResultStatus
+import com.fut.app.common.api.request.toEntity
 import com.fut.app.entity.UserEntity
 import com.fut.app.entity.toUser
 import com.fut.app.repository.UserRepository
 import com.fut.app.service.user.UserService
-import com.fut.app.utils.randomLongNonNegative
 import com.fut.app.utils.randomString
 import com.fut.app.utils.user.stubbedCreateUserRequest
 import com.fut.app.utils.user.stubbedUserEntity
@@ -16,8 +16,10 @@ import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
+import kotlin.test.Ignore
 
 class UserServiceTest {
 
@@ -30,7 +32,7 @@ class UserServiceTest {
     @BeforeEach
     fun before() {
         every { userRepository.findAll() } returns listOf(stubbedUserEntity)
-        every { userRepository.save(any()) } returns stubbedUserEntity
+        every { userRepository.save(any()) } returns stubbedCreateUserRequest.toEntity()
         every { userRepository.existsByEmail(any()) } returns false
         every { userRepository.findById(any()) } returns Optional.of(stubbedUserEntity)
         every { userRepository.findByIdOrNull(any()) } returns stubbedUserEntity
@@ -53,7 +55,7 @@ class UserServiceTest {
 
     @Test
     fun `WHEN creating a user THEN return the newly created user`() {
-        val expected = Success(stubbedUserEntity.toUser())
+        val expected = Success(stubbedCreateUserRequest.toEntity().toUser())
         val actual = userService.createUser(stubbedCreateUserRequest)
         assertThat(actual).isEqualTo(expected)
     }
@@ -75,15 +77,27 @@ class UserServiceTest {
     }
 
     @Test
+    fun `WHEN creating a user AND unexpected error THEN throw the error`() {
+        every { userRepository.save(any()) } throws RuntimeException("error")
+        assertThrows<Exception> { userService.createUser(stubbedCreateUserRequest) }
+    }
+
+    @Test
     fun `WHEN updating a user THEN return the updated user`() {
         val newName = "Changed"
+        val modifiedEntity = stubbedCreateUserRequest.toEntity().copy(name = newName)
 
-        every { userRepository.save(any()) } returns stubbedUserEntity.copy(name = newName)
+        every { userRepository.save(any()) } returns modifiedEntity
 
-        val expected = Success(stubbedUserEntity.copy(name = newName).toUser())
+        val expected = Success(modifiedEntity.toUser())
         val actual = userService.updateUser(
-            id = randomLongNonNegative(),
-            request = stubbedCreateUserRequest.copy(name = newName)
+            id = stubbedUserEntity.id,
+            request = stubbedCreateUserRequest(
+                name = stubbedUserEntity.name,
+                lastName = stubbedUserEntity.lastName,
+                email = stubbedUserEntity.email,
+                password = stubbedUserEntity.password
+            )
         )
         assertThat(actual).isEqualTo(expected)
     }
@@ -92,10 +106,11 @@ class UserServiceTest {
     fun `WHEN updating a user AND the user is not found then return Failure`() {
         every { userRepository.findByIdOrNull(any()) } returns null
         val expected = Failure(CreateUserResultStatus.NOT_FOUND)
-        val actual = userService.updateUser(randomLongNonNegative(), stubbedCreateUserRequest)
+        val actual = userService.updateUser(stubbedUserEntity.id, stubbedCreateUserRequest)
         assertThat(actual).isEqualTo(expected)
     }
 
+    @Ignore("Handled in a functional test")
     @Test
     fun `WHEN updating a user and the id is invalid THEN return Failure`() {
         // functional test
@@ -105,14 +120,21 @@ class UserServiceTest {
     fun `WHEN updating a user and the request has a existing email THEN return Failure`() {
         every { userRepository.existsByEmail(any()) } returns true
         val expected = Failure(CreateUserResultStatus.EMAIL_CONFLICT)
-        val actual = userService.updateUser(randomLongNonNegative(), stubbedCreateUserRequest)
+        val actual = userService.updateUser(stubbedUserEntity.id, stubbedCreateUserRequest)
         assertThat(actual).isEqualTo(expected)
     }
 
     @Test
     fun `WHEN updating a user and the request has an invalid email THEN return Failure`() {
         val expected = Failure(CreateUserResultStatus.INVALID_EMAIL)
-        val actual = userService.updateUser(randomLongNonNegative(), stubbedCreateUserRequest.copy(email = randomString()))
+        val actual = userService.updateUser(stubbedUserEntity.id, stubbedCreateUserRequest.copy(email = randomString()))
         assertThat(actual).isEqualTo(expected)
+    }
+
+    @Test
+    fun `WHEN updating a user AND unexpected error THEN throw the error`() {
+        every { userRepository.save(any()) } throws RuntimeException("error")
+
+        assertThrows<Exception> { userService.updateUser(stubbedUserEntity.id, stubbedCreateUserRequest) }
     }
 }

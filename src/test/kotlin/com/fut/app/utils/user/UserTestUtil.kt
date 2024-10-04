@@ -22,11 +22,13 @@ fun stubbedUserEntity(
 fun stubbedCreateUserRequest(
     name: String = randomString(),
     lastName: String = randomString(),
-    email: String = randomEmail()
+    email: String = randomEmail(),
+    password: String = randomString()
 ) = CreateUserRequest(
     name = name,
     lastName = lastName,
-    email = email
+    email = email,
+    password = password
 )
 
 fun stubbedUser(

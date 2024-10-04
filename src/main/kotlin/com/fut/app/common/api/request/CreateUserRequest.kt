@@ -15,12 +15,16 @@ data class CreateUserRequest(
     @Schema(example = "peter.parker@example.com", required = true)
     @field:Email(message = "Invalid email address", regexp = ".+@.+\\..+")
     val email: String,
+
+    @Schema(example = "StrongPassword123", required = true)
+    val password: String
 )
 
 fun CreateUserRequest.toEntity() = UserEntity(
     name = name,
     lastName = lastName,
-    email = email
+    email = email,
+    password = password // TODO: encoding
 )
 
 enum class CreateUserResultStatus {

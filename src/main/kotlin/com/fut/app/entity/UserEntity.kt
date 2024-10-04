@@ -17,8 +17,11 @@ data class UserEntity(
 
     val lastName: String = EMPTY_STRING,
 
+    @Column(unique = true)
     @Email
     val email: String = EMPTY_STRING,
+
+    val password: String = EMPTY_STRING
 )
 
 fun UserEntity.toUser() = User(id, name, lastName, email)
